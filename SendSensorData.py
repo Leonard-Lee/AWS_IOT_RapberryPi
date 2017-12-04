@@ -64,9 +64,9 @@ print(msg)
 client.loop_start()
 
 while True:
-    sleep(2)
+    sleep(10)
     if connflag == True:
         client.publish('sensors', json.dumps(msg))
-        print("msg sent: temperature " + "%.2f")
+        print(msg)
     else:
         print("waiting for connection...")
