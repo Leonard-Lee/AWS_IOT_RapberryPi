@@ -49,7 +49,7 @@ def temphumid():
 def getIP():
     # get the private IP
     private_ip = ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr']
-    print private_ip
+    return private_ip
 
 client = mqtt.Client(client_id='aws_temp_humid_client', protocol=mqtt.MQTTv311)
 client.on_connect = on_connect
@@ -59,6 +59,7 @@ client.tls_set(ca_certs='certs/root.ca.pem',
                certfile='certs/fcb5dd2aea-certificate.pem.crt',
                tls_version=ssl.PROTOCOL_TLSv1_2,
                ciphers=None)
+
 client.tls_insecure_set(True)
 client.connect('agwj5stucs72x.iot.us-west-2.amazonaws.com', 8883, 60)
 temp, humid = temphumid()
