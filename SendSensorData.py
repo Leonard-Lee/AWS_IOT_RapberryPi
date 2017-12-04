@@ -49,7 +49,7 @@ def temphumid():
 def getIP():
     # get the private IP
     private_ip = ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr']
-    print private_ip
+    return private_ip
 
 client = mqtt.Client(client_id='aws_temp_humid_client', protocol=mqtt.MQTTv311)
 client.on_connect = on_connect
