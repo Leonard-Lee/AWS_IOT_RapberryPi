@@ -70,7 +70,7 @@ client.publish('sensors', json.dumps(msg))
 # Connect to the database
 connection = pymysql.connect(host='localhost',
                              user='rpuser',
-                             password='12345',
+                             password='llll5645',
                              db='Sensors',
                              charset='utf8mb4',
                              cursorclass=pymysql.cursors.DictCursor)
@@ -80,7 +80,7 @@ try:
         # Create a new record
         sql = "INSERT INTO `SensorData` (`temperature`, `humidity`, `ip`) VALUES (%s, %s, %s)"
         cursor.execute(sql, (temp, humid, ip))
-        print ('insert sql: ' & sql)
+        print ('insert sql: '+ sql)
     # connection is not autocommit by default. So you must commit to save
     # your changes.
     connection.commit()
