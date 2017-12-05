@@ -43,7 +43,7 @@ def temphumid():
         '{:0.2f}'.format(3.141592653589793)
         strTemp = '{:0.2f}*F'.format(temperature)
         strHumidity = '{:0.2f}%'.format(humidity)
-        return (strTemp, strHumidity)
+        return (int(temperature), int(humidity))
     else:
         return ('-9999.99', '-9999.99')
 
@@ -62,6 +62,12 @@ client.loop_start()
 
 # insert data to MySQL and DynamoDB
 temp, humid = temphumid()
+if isinstance(temp, int):
+    print("temp is int")
+if isinstance(humid, int):
+    print("humid is int")
+
+
 ip = getIP()
 msg = dict(temperature=temp, humidity=humid, ip=ip, timestamp=getNow())
 # aws publish
@@ -79,18 +85,19 @@ try:
     with connection.cursor() as cursor:
         # Create a new record
         sql = "INSERT INTO `SensorData` (`temperature`, `humidity`, `ip`) VALUES (%s, %s, %s)"
+	print(sql % (temp, humid, ip))
         cursor.execute(sql, (temp, humid, ip))
-        print ('insert sql: '+ sql)
+        #print ('insert sql: '+ sql)
     # connection is not autocommit by default. So you must commit to save
     # your changes.
     connection.commit()
 
     with connection.cursor() as cursor:
         # Read a single record
-        sql = "SELECT `id`, `password` FROM `SensorData` BY id DESC LIMIT 1;"
+        sql = "SELECT * FROM `SensorData` ORDER BY sensorID DESC LIMIT 1"
         cursor.execute(sql)
         result = cursor.fetchone()
-        print('Insert data: ' & result)
+        print(result)
 finally:
     connection.close()
 print(msg)
