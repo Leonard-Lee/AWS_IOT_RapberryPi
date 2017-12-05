@@ -65,40 +65,38 @@ client.tls_insecure_set(True)
 client.connect('agwj5stucs72x.iot.us-west-2.amazonaws.com', 8883, 60)
 client.loop_start()
 
+# insert data to MySQL and DynamoDB
+temp, humid = temphumid()
+ip = getIP()
+msg = dict(temperature=temp, humidity=humid, ip=ip, timestamp=getNow())
+# aws publish
+client.publish('sensors', json.dumps(msg))
+# mysql
+# Connect to the database
+connection = pymysql.connect(host='localhost',
+                             user='rpuser',
+                             password='12345',
+                             db='Sensors',
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
 
-if connflag == True:
-    temp, humid = temphumid()
-    ip = getIP()
-    msg = dict(temperature=temp, humidity=humid, ip=ip, timestamp=getNow())
-    # aws publish
-    client.publish('sensors', json.dumps(msg))
-    # mysql
-    # Connect to the database
-    connection = pymysql.connect(host='localhost',
-                                 user='rpuser',
-                                 password='12345',
-                                 db='Sensors',
-                                 charset='utf8mb4',
-                                 cursorclass=pymysql.cursors.DictCursor)
+try:
+    with connection.cursor() as cursor:
+        # Create a new record
+        sql = "INSERT INTO `SensorData` (`temperature`, `humidity`, `ip`) VALUES (%s, %s, %s)"
+        cursor.execute(sql, (temp, humid, ip))
+        print ('insert sql: ' & sql)
+    # connection is not autocommit by default. So you must commit to save
+    # your changes.
+    connection.commit()
 
-    try:
-        with connection.cursor() as cursor:
-            # Create a new record
-            sql = "INSERT INTO `SensorData` (`temperature`, `humidity`, `ip`) VALUES (%s, %s, %s)"
-            cursor.execute(sql, (temp, humid, ip))
-            print ('insert sql: ' & sql)
-        # connection is not autocommit by default. So you must commit to save
-        # your changes.
-        connection.commit()
+    with connection.cursor() as cursor:
+        # Read a single record
+        sql = "SELECT `id`, `password` FROM `SensorData` BY id DESC LIMIT 1;"
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        print('Insert data: ' & result)
+finally:
+    connection.close()
+print(msg)
 
-        with connection.cursor() as cursor:
-            # Read a single record
-            sql = "SELECT `id`, `password` FROM `SensorData` BY id DESC LIMIT 1;"
-            cursor.execute(sql)
-            result = cursor.fetchone()
-            print('Insert data: ' & result)
-    finally:
-        connection.close()
-    print(msg)
-else:
-    print("waiting for connection...")
